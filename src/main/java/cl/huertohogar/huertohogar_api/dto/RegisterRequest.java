@@ -25,7 +25,7 @@ public class RegisterRequest {
 
     @NotBlank
     @Size(min = 6)
-    @Schema(description = "Contraseña del usuario (mínimo 6 caracteres)", example = "password123", required = true, minLength = 6)
+    @Schema(description = "Contraseña del usuario (mínimo 6 caracteres)", example = "MyS3cur3P@ssw0rd!", required = true, minLength = 6)
     private String password;
 
     @NotBlank

@@ -18,6 +18,8 @@ Desarrollo: http://localhost:8080
 Producción: https://api.huertohogar.cl
 ```
 
+**Importante:** Siempre use HTTPS en producción para proteger los tokens JWT y datos sensibles.
+
 ## Autenticación
 
 ### 1. Registrar Usuario
@@ -453,8 +455,13 @@ interface ApiService {
 
 // Retrofit Configuration
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/" // Para emulador Android
-    // Para dispositivo físico usar IP de la computadora: "http://192.168.1.X:8080/"
+    // Para desarrollo local (emulador Android)
+    private const val BASE_URL_DEV = "http://10.0.2.2:8080/"
+    // Para producción (usar HTTPS)
+    private const val BASE_URL_PROD = "https://api.huertohogar.cl/"
+    // Para dispositivo físico en desarrollo usar IP de la computadora: "http://192.168.1.X:8080/"
+    
+    private val BASE_URL = BASE_URL_DEV // Cambiar a BASE_URL_PROD en producción
     
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -614,6 +621,7 @@ class OrderViewModel : ViewModel() {
 import axios from 'axios';
 
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// Para producción, configurar REACT_APP_API_URL=https://api.huertohogar.cl
 
 const api = axios.create({
   baseURL: BASE_URL,
