@@ -1,0 +1,40 @@
+package cl.huertohogar.huertohogar_api.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+@Entity
+@Table(name = "orders")
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_email", nullable = false)
+    private User user;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private List<OrderItem> items;
+
+    @Column(nullable = false)
+    private Double total;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Estado estado;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    public enum Estado {
+        PENDIENTE, CONFIRMADO, ENVIADO, ENTREGADO, CANCELADO
+    }
+}
