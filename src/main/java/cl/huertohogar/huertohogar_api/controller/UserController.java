@@ -1,5 +1,6 @@
 package cl.huertohogar.huertohogar_api.controller;
 
+import cl.huertohogar.huertohogar_api.dto.RegisterRequest;
 import cl.huertohogar.huertohogar_api.dto.UserResponse;
 import cl.huertohogar.huertohogar_api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,8 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Tag(name = "Users", description = "Endpoints para gestión de usuarios")
 public class UserController {
@@ -81,5 +84,43 @@ public class UserController {
             @PathVariable String email) {
         UserResponse user = userService.getUserById(email);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+        summary = "Crear usuario desde panel admin",
+        description = "Crea un nuevo usuario con rol USER desde el panel de administración.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody RegisterRequest request) {
+        UserResponse user = userService.createUserFromAdmin(request);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/{email}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+        summary = "Actualizar usuario",
+        description = "Actualiza los datos de un usuario existente identificado por su email.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable String email,
+            @Valid @RequestBody RegisterRequest request) {
+        UserResponse user = userService.updateUserFromAdmin(email, request);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/{email}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+        summary = "Eliminar usuario",
+        description = "Elimina un usuario identificado por su email.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<Void> deleteUser(@PathVariable String email) {
+        userService.deleteUser(email);
+        return ResponseEntity.noContent().build();
     }
 }

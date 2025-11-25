@@ -4,6 +4,7 @@ CREATE TABLE users (
     email VARCHAR(255) PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
+    run VARCHAR(20),
     password VARCHAR(255) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
     telefono VARCHAR(50) NOT NULL,
