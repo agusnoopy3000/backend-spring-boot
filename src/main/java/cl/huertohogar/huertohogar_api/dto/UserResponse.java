@@ -11,6 +11,7 @@ public class UserResponse {
     private String email;
     private String nombre;
     private String apellido;
+    private String run;
     private String direccion;
     private String telefono;
     private String rol;
@@ -20,6 +21,7 @@ public class UserResponse {
         this.email = user.getEmail();
         this.nombre = user.getNombre();
         this.apellido = user.getApellido();
+        this.run = user.getRun();
         this.direccion = user.getDireccion();
         this.telefono = user.getTelefono();
         this.rol = user.getRol().name();

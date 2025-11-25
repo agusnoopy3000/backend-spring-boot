@@ -38,14 +38,17 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Permitir sin autenticación Swagger UI, OpenAPI y H2
+                // Rutas públicas - sin autenticación
                 .requestMatchers(
-                    "/auth/**",
+                    "/api/v1/auth/**",           // Login y registro
+                    "/api/v1/products",          // Listar productos (catálogo público)
+                    "/api/v1/products/**",       // Ver detalle de producto
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/api-docs/**",
                     "/h2-console/**"
                 ).permitAll()
+                // Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

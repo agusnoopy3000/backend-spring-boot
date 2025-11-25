@@ -35,23 +35,20 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 7, max = 100, message = "La contraseña debe tener al menos 7 caracteres")
-    // Si quisieras exigir caracter especial, podrías activar este patrón:
-    // @Pattern(
-    //   regexp = "^(?=.*[!@#$%^&*()_+\\-={}\\[\\]:;\"'`<>,.?/\\\\]).{7,100}$",
-    //   message = "La contraseña debe incluir al menos un carácter especial"
-    // )
-    @Schema(description = "Contraseña del usuario (mínimo 7 caracteres)", example = "MyS3cur3P@ssw0rd!", minLength = 7)
+    @Size(min = 8, max = 100, message = "La contraseña debe tener al menos 8 caracteres")
+    @Pattern(
+      regexp = "^(?=.*[!@#$%^&*()_+\\-={}\\[\\]:;\"'`<>,.?/\\\\]).{8,100}$",
+      message = "La contraseña debe incluir al menos un carácter especial"
+    )
+    @Schema(description = "Contraseña del usuario (mínimo 8 caracteres con al menos 1 especial)", example = "MyS3cur3P@ssw0rd!", minLength = 8)
     private String password;
 
-    @NotBlank(message = "La dirección es obligatoria")
-    @Size(max = 200, message = "La dirección no puede superar 200 caracteres")
-    @Schema(description = "Dirección del usuario", example = "Av. Principal 123, Santiago")
+        @Size(max = 200, message = "La dirección no puede superar 200 caracteres")
+    @Schema(description = "Dirección del usuario (opcional)", example = "Av. Principal 123, Santiago")
     private String direccion;
 
-    @NotBlank(message = "El teléfono es obligatorio")
     @Size(max = 20, message = "El teléfono no puede superar 20 caracteres")
-    @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "El teléfono debe ser un número válido")
-    @Schema(description = "Teléfono de contacto", example = "+56912345678")
+    @Pattern(regexp = "^(\\+?[0-9]{9,15})?$", message = "El teléfono debe ser un número válido")
+    @Schema(description = "Teléfono de contacto (opcional)", example = "+56912345678")
     private String telefono;
 }

@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,9 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-
 import java.io.IOException;
 
 @Component
@@ -25,9 +21,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-
-    @Value("${jwt.secret}")
-    private String secretKey;
 
     @Override
     protected void doFilterInternal(
@@ -58,14 +51,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                // Parse claims to extract role (if present) and set request attributes for controllers
-                try {
-                    Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwt).getBody();
-                    String role = claims.get("role", String.class);
-                    if (role != null) {
-                        request.setAttribute("role", role);
-                    }
-                } catch (Exception ignored) { }
+                // Extract role from JWT using JwtService
+                String role = jwtService.extractClaim(jwt, claims -> claims.get("role", String.class));
+                if (role != null) {
+                    request.setAttribute("role", role);
+                } else {
+                    // Default to USER if role not found
+                    request.setAttribute("role", "USER");
+                }
                 request.setAttribute("email", userEmail);
             }
         }

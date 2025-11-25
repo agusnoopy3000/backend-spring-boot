@@ -41,6 +41,12 @@ public class ProductService {
         return new ProductResponse(product);
     }
 
+    public ProductResponse getProductByCodigo(String codigo) {
+        Product product = productRepository.findByCodigo(codigo)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with code: " + codigo));
+        return new ProductResponse(product);
+    }
+
     public List<ProductResponse> getAllProducts(String q) {
         List<Product> products = (q != null && !q.isEmpty()) ? productRepository.findByQuery(q) : productRepository.findAll();
         return products.stream().map(ProductResponse::new).toList();

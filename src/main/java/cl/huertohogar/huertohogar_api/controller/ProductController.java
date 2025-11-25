@@ -59,6 +59,23 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
+    @GetMapping("/codigo/{codigo}")
+    @Operation(
+        summary = "Obtener producto por código",
+        description = "Retorna los detalles de un producto específico usando su código único (ej: VH-001)"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Producto encontrado",
+            content = @Content(schema = @Schema(implementation = ProductResponse.class))),
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado", content = @Content)
+    })
+    public ResponseEntity<ProductResponse> getProductByCodigo(
+            @Parameter(description = "Código del producto (ej: VH-001)", required = true)
+            @PathVariable String codigo) {
+        ProductResponse product = productService.getProductByCodigo(codigo);
+        return ResponseEntity.ok(product);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
