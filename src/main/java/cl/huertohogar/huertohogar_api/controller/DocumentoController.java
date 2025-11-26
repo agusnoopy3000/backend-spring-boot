@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/documentos")
+@RequestMapping("/api/documentos")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Documentos", description = "Endpoints para gestión de documentos en S3")
@@ -89,7 +89,7 @@ public class DocumentoController {
         return ResponseEntity.ok(documento);
     }
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
         summary = "Subir documento",
         description = "Sube un documento a S3 y guarda sus metadatos. Solo accesible para administradores. " +
@@ -110,23 +110,27 @@ public class DocumentoController {
             @RequestAttribute("email") String email,
             @RequestAttribute(value = "role", required = false) String role) {
         
+        log.info("Solicitud de subida de archivo recibida de usuario: {} con rol: {}", email, role);
+        
         // Verificar que sea ADMIN
         if (role == null || !role.equalsIgnoreCase("ADMIN")) {
+            log.warn("Acceso denegado a {}: no tiene rol ADMIN", email);
             return ResponseEntity.status(403).body("Acceso denegado: se requiere rol ADMIN");
         }
 
         try {
+            log.info("Subiendo archivo: {} ({}  bytes)", file.getOriginalFilename(), file.getSize());
             Documento documento = documentoService.upload(file, email);
-            log.info("Documento subido por {}: {}", email, documento.getNombre());
+            log.info("Documento subido exitosamente por {}: {}", email, documento.getNombre());
             return ResponseEntity.ok(documento);
         } catch (IllegalArgumentException e) {
             log.warn("Error de validación al subir documento: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IOException e) {
-            log.error("Error de I/O al subir documento: {}", e.getMessage());
+            log.error("Error de I/O al subir documento: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().body("Error al procesar el archivo: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Error inesperado al subir documento: {}", e.getMessage());
+            log.error("Error inesperado al subir documento: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().body("Error al subir documento: " + e.getMessage());
         }
     }

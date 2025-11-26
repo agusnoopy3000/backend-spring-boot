@@ -5,6 +5,7 @@ import cl.huertohogar.huertohogar_api.dto.OrderResponse;
 import cl.huertohogar.huertohogar_api.exception.ResourceNotFoundException;
 import cl.huertohogar.huertohogar_api.model.Order;
 import cl.huertohogar.huertohogar_api.model.OrderItem;
+import cl.huertohogar.huertohogar_api.model.OrderStatus;
 import cl.huertohogar.huertohogar_api.model.Product;
 import cl.huertohogar.huertohogar_api.model.User;
 import cl.huertohogar.huertohogar_api.repository.OrderRepository;
@@ -34,7 +35,7 @@ public class OrderService {
 
         Order order = new Order();
         order.setUser(user);
-        order.setEstado(Order.Estado.PENDIENTE);
+        order.setEstado(OrderStatus.PENDIENTE);
 
         // CAMPOS DE ENTREGA
         order.setDireccionEntrega(
@@ -88,7 +89,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse updateOrderStatus(Long id, Order.Estado estado) {
+    public OrderResponse updateOrderStatus(Long id, OrderStatus estado) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         order.setEstado(estado);

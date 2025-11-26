@@ -1,6 +1,7 @@
+# Existing ignores
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -31,3 +32,25 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Scripts with secrets (local only)
+deploy-to-ec2.sh
+update-ec2.sh
+
+# Documentation files (keep them local)
+ADMIN_PANEL_ENDPOINTS.md
+ADMIN_PANEL_QUICK_REFERENCE.md
+BACKEND_API_VALIDATION.md
+FRONTEND_CHECKLIST.md
+FRONTEND_INTEGRATION_GUIDE.md
+POSTMAN_TEST_GUIDE.md
+RESUMEN_EJECUTIVO_PANEL_ADMIN.md
+RESUMEN_PANEL_ADMIN.md
+REST_API_ENDPOINTS.md
+TESTING_SUMMARY.md
+*.postman_collection.json

@@ -2,7 +2,7 @@ package cl.huertohogar.huertohogar_api.controller;
 
 import cl.huertohogar.huertohogar_api.dto.OrderRequest;
 import cl.huertohogar.huertohogar_api.dto.OrderResponse;
-import cl.huertohogar.huertohogar_api.model.Order;
+import cl.huertohogar.huertohogar_api.model.OrderStatus;
 import cl.huertohogar.huertohogar_api.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -103,6 +104,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
         summary = "Actualizar estado del pedido",
         description = "Actualiza el estado de un pedido. Solo accesible para administradores. Estados disponibles: PENDIENTE, CONFIRMADO, ENVIADO, ENTREGADO, CANCELADO.",
@@ -117,11 +119,7 @@ public class OrderController {
     public ResponseEntity<OrderResponse> updateStatus(
             @Parameter(description = "ID del pedido", required = true)
             @PathVariable Long id,
-            @RequestAttribute("role") String role,
             @RequestBody UpdateStatusRequest body) {
-        if (!"admin".equalsIgnoreCase(role)) {
-            return ResponseEntity.status(403).build();
-        }
         OrderResponse updated = orderService.updateOrderStatus(id, body.getEstado());
         return ResponseEntity.ok(updated);
     }
@@ -130,6 +128,6 @@ public class OrderController {
     @Schema(description = "Request para actualizar el estado de un pedido")
     private static class UpdateStatusRequest {
         @Schema(description = "Nuevo estado del pedido", example = "CONFIRMADO", allowableValues = {"PENDIENTE", "CONFIRMADO", "ENVIADO", "ENTREGADO", "CANCELADO"})
-        private Order.Estado estado;
+        private OrderStatus estado;
     }
 }

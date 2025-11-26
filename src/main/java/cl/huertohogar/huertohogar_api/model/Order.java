@@ -29,7 +29,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Estado estado;
+    private OrderStatus estado;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -49,8 +49,4 @@ public class Order {
 
     @Column(name = "fecha_entrega")
     private LocalDate fechaEntrega;
-
-    public enum Estado {
-        PENDIENTE, CONFIRMADO, ENVIADO, ENTREGADO, CANCELADO
-    }
 }

@@ -55,17 +55,28 @@ public class S3Service {
 
     @PostConstruct
     public void init() {
+        log.info("Inicializando S3Service...");
+        log.info("Bucket: {}, Region: {}", bucketName, region);
+        log.info("Access Key configurado: {}", accessKeyId != null && !accessKeyId.isEmpty() ? "SÍ" : "NO");
+        log.info("Secret Key configurado: {}", secretAccessKey != null && !secretAccessKey.isEmpty() ? "SÍ" : "NO");
+        
         if (accessKeyId != null && !accessKeyId.isEmpty() 
             && secretAccessKey != null && !secretAccessKey.isEmpty()) {
             
-            AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
-            this.s3Client = S3Client.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .build();
-            log.info("S3Client inicializado para bucket: {} en región: {}", bucketName, region);
+            try {
+                AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+                this.s3Client = S3Client.builder()
+                    .region(Region.of(region))
+                    .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                    .build();
+                log.info("✅ S3Client inicializado exitosamente para bucket: {} en región: {}", bucketName, region);
+            } catch (Exception e) {
+                log.error("❌ Error inicializando S3Client: {}", e.getMessage(), e);
+                throw new RuntimeException("Error al inicializar S3Client", e);
+            }
         } else {
-            log.warn("AWS credentials no configuradas. S3Service operará en modo simulado.");
+            log.warn("⚠️ AWS credentials NO configuradas. S3Service operará en modo simulado.");
+            log.warn("Configure AWS_ACCESS_KEY_ID y AWS_SECRET_ACCESS_KEY en las variables de entorno");
         }
     }
 
@@ -75,12 +86,13 @@ public class S3Service {
      * @return Array con [s3Key, urlPublica]
      */
     public String[] uploadFile(MultipartFile file) throws IOException {
+        log.info("Iniciando uploadFile para: {} ({} bytes)", file.getOriginalFilename(), file.getSize());
+        
         // Validaciones
         validateFile(file);
 
         // Generar s3Key único
         String originalFilename = file.getOriginalFilename();
-        String extension = getFileExtension(originalFilename);
         LocalDate now = LocalDate.now();
         String s3Key = String.format("documentos/%d/%02d/%s-%s",
             now.getYear(),
@@ -89,30 +101,40 @@ public class S3Service {
             sanitizeFilename(originalFilename)
         );
 
+        log.info("S3 Key generado: {}", s3Key);
+
         // Si no hay cliente S3 configurado, modo simulado
         if (s3Client == null) {
-            log.warn("S3Client no configurado. Retornando URL simulada.");
-            String simulatedUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", 
-                bucketName, region, s3Key);
-            return new String[] { s3Key, simulatedUrl };
+            log.error("❌ S3Client NO está configurado. No se puede subir el archivo.");
+            throw new RuntimeException("S3 no está configurado. Verifique las credenciales AWS.");
         }
 
-        // Subir a S3
-        PutObjectRequest putRequest = PutObjectRequest.builder()
-            .bucket(bucketName)
-            .key(s3Key)
-            .contentType(file.getContentType())
-            .contentLength(file.getSize())
-            .build();
+        try {
+            // Subir a S3
+            log.info("Subiendo archivo a S3...");
+            PutObjectRequest putRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(s3Key)
+                .contentType(file.getContentType())
+                .contentLength(file.getSize())
+                .build();
 
-        s3Client.putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
-        
-        // Generar URL pública
-        String urlPublica = String.format("https://%s.s3.%s.amazonaws.com/%s", 
-            bucketName, region, s3Key);
+            s3Client.putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
+            
+            // Generar URL pública
+            String urlPublica = String.format("https://%s.s3.%s.amazonaws.com/%s", 
+                bucketName, region, s3Key);
 
-        log.info("Archivo subido exitosamente: {}", s3Key);
-        return new String[] { s3Key, urlPublica };
+            log.info("✅ Archivo subido exitosamente a S3: {}", urlPublica);
+            return new String[] { s3Key, urlPublica };
+            
+        } catch (S3Exception e) {
+            log.error("❌ Error de S3 al subir archivo: {} - {}", e.awsErrorDetails().errorCode(), e.getMessage(), e);
+            throw new RuntimeException("Error de S3: " + e.awsErrorDetails().errorMessage());
+        } catch (Exception e) {
+            log.error("❌ Error inesperado al subir archivo a S3: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al subir archivo a S3: " + e.getMessage());
+        }
     }
 
     /**

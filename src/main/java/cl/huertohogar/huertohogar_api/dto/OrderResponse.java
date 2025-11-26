@@ -1,6 +1,7 @@
 package cl.huertohogar.huertohogar_api.dto;
 
 import cl.huertohogar.huertohogar_api.model.Order;
+import cl.huertohogar.huertohogar_api.model.OrderStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -14,7 +15,7 @@ public class OrderResponse {
     private UserResponse user;
     private List<OrderItemResponse> items;
     private Double total;
-    private Order.Estado estado;
+    private OrderStatus estado;
     private String direccionEntrega;
     private String region;
     private String comuna;
