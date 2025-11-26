@@ -63,11 +63,10 @@ public class OrderController {
             @Parameter(description = "ID del pedido", required = true)
             @PathVariable Long id,
             @RequestAttribute("email") String email,
-            @RequestAttribute(value = "role", required = false) String role) {
+            @RequestAttribute("role") String role) {
         OrderResponse order = orderService.getOrderById(id);
-        // Check if user owns the order or is admin (null-safe, case-insensitive)
-        boolean isAdmin = role != null && role.equalsIgnoreCase("ADMIN");
-        if (!order.getUser().getEmail().equals(email) && !isAdmin) {
+        // Check if user owns the order or is admin
+        if (!order.getUser().getEmail().equals(email) && !"admin".equalsIgnoreCase(role)) {
             return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(order);
@@ -112,43 +111,25 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Estado actualizado exitosamente",
             content = @Content(schema = @Schema(implementation = OrderResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Estado inválido o no proporcionado", content = @Content),
         @ApiResponse(responseCode = "403", description = "Acceso denegado - se requiere rol ADMIN", content = @Content),
         @ApiResponse(responseCode = "404", description = "Pedido no encontrado", content = @Content)
     })
     public ResponseEntity<OrderResponse> updateStatus(
             @Parameter(description = "ID del pedido", required = true)
             @PathVariable Long id,
-            @RequestAttribute(value = "role", required = false) String role,
+            @RequestAttribute("role") String role,
             @RequestBody UpdateStatusRequest body) {
-        // Verificar que el rol sea ADMIN (case-insensitive, null-safe)
-        if (role == null || !role.equalsIgnoreCase("ADMIN")) {
+        if (!"admin".equalsIgnoreCase(role)) {
             return ResponseEntity.status(403).build();
         }
-        // Verificar que el estado no sea null
-        Order.Estado estado = body.getEstado();
-        if (estado == null && body.getStatus() != null) {
-            // Intentar parsear desde el campo "status" (compatibilidad con frontend)
-            try {
-                estado = Order.Estado.valueOf(body.getStatus().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().build();
-            }
-        }
-        if (estado == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        OrderResponse updated = orderService.updateOrderStatus(id, estado);
+        OrderResponse updated = orderService.updateOrderStatus(id, body.getEstado());
         return ResponseEntity.ok(updated);
     }
 
     @Data
     @Schema(description = "Request para actualizar el estado de un pedido")
-    static class UpdateStatusRequest {
+    private static class UpdateStatusRequest {
         @Schema(description = "Nuevo estado del pedido", example = "CONFIRMADO", allowableValues = {"PENDIENTE", "CONFIRMADO", "ENVIADO", "ENTREGADO", "CANCELADO"})
         private Order.Estado estado;
-        
-        @Schema(description = "Alias para estado (compatibilidad)", example = "CONFIRMADO")
-        private String status;
     }
 }

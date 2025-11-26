@@ -20,7 +20,7 @@ INSERT INTO products (codigo, nombre, descripcion, precio, stock, imagen, catego
 ('VH-001', 'Lechuga Costina', 'Lechuga costina fresca, cultivada orgánicamente. Ideal para ensaladas.', 1500, 100, 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400', 'Verduras de Hoja'),
 ('VH-002', 'Espinaca', 'Espinaca fresca en atado. Rica en hierro y vitaminas.', 1800, 80, 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400', 'Verduras de Hoja'),
 ('VH-003', 'Acelga', 'Acelga orgánica en atado. Perfecta para guisos y salteados.', 1600, 60, 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400', 'Verduras de Hoja'),
-('VH-004', 'Rúcula', 'Rúcula fresca con sabor ligeramente picante. Para ensaladas gourmet.', 2000, 50, 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400', 'Verduras de Hoja'),
+('VH-004', 'Rúcula', 'Rúcula fresca con sabor ligeramente picante. Para ensaladas gourmet.', 2000, 50, 'https://images.unsplash.com/photo-1518164147695-36c13dd568f2?w=400', 'Verduras de Hoja'),
 ('VH-005', 'Kale', 'Kale o col rizada. Superfood rico en antioxidantes.', 2200, 40, 'https://images.unsplash.com/photo-1524179091875-bf99a9a6af57?w=400', 'Verduras de Hoja'),
 
 -- Tomates
