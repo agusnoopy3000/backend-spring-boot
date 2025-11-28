@@ -12,6 +12,7 @@ import cl.huertohogar.huertohogar_api.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,12 @@ import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FirestoreSyncService firestoreSyncService;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -48,6 +51,11 @@ public class AuthService {
         user.setRol(Role.USER);
 
         user = userRepository.save(user);
+        
+        // Sincronizar nuevo usuario a Firestore
+        firestoreSyncService.syncUsuario(user);
+        log.info("Usuario {} registrado y sincronizado a Firestore", user.getEmail());
+        
         String token = generateToken(user);
         return new AuthResponse(token, new UserResponse(user));
     }

@@ -130,4 +130,37 @@ public class OrderController {
         @Schema(description = "Nuevo estado del pedido", example = "CONFIRMADO", allowableValues = {"PENDIENTE", "CONFIRMADO", "ENVIADO", "ENTREGADO", "CANCELADO"})
         private OrderStatus estado;
     }
+
+    @PutMapping("/{id}/cancel")
+    @Operation(
+        summary = "Cancelar mi pedido",
+        description = "Permite al usuario cancelar su propio pedido. Solo se puede cancelar si el estado es PENDIENTE.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Pedido cancelado exitosamente",
+            content = @Content(schema = @Schema(implementation = OrderResponse.class))),
+        @ApiResponse(responseCode = "400", description = "El pedido no se puede cancelar (estado no es PENDIENTE)", content = @Content),
+        @ApiResponse(responseCode = "403", description = "No es el propietario del pedido", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Pedido no encontrado", content = @Content)
+    })
+    public ResponseEntity<OrderResponse> cancelMyOrder(
+            @Parameter(description = "ID del pedido", required = true)
+            @PathVariable Long id,
+            @RequestAttribute("email") String email) {
+        OrderResponse order = orderService.getOrderById(id);
+        
+        // Verificar que el usuario sea el propietario
+        if (!order.getUser().getEmail().equals(email)) {
+            return ResponseEntity.status(403).build();
+        }
+        
+        // Solo se puede cancelar si está PENDIENTE
+        if (order.getEstado() != OrderStatus.PENDIENTE) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        OrderResponse cancelled = orderService.updateOrderStatus(id, OrderStatus.CANCELADO);
+        return ResponseEntity.ok(cancelled);
+    }
 }

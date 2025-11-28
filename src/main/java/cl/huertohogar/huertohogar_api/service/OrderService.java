@@ -25,6 +25,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final ProductRepository productRepository;
+    private final FirestoreSyncService firestoreSyncService;
     
     @PersistenceContext
     private EntityManager entityManager;
@@ -70,6 +71,10 @@ public class OrderService {
         order.setTotal(total);
 
         Order savedOrder = orderRepository.save(order);
+        
+        // Sincronizar a Firestore para tiempo real en app admin
+        firestoreSyncService.syncPedido(savedOrder);
+        
         return new OrderResponse(savedOrder);
     }
 
@@ -93,6 +98,11 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         order.setEstado(estado);
-        return new OrderResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+        
+        // Sincronizar cambio de estado a Firestore
+        firestoreSyncService.syncPedidoEstado(id, estado);
+        
+        return new OrderResponse(savedOrder);
     }
 }

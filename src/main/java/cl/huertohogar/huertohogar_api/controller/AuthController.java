@@ -1,9 +1,11 @@
 package cl.huertohogar.huertohogar_api.controller;
 
 import cl.huertohogar.huertohogar_api.dto.AuthResponse;
+import cl.huertohogar.huertohogar_api.dto.FirebaseSyncRequest;
 import cl.huertohogar.huertohogar_api.dto.LoginRequest;
 import cl.huertohogar.huertohogar_api.dto.RegisterRequest;
 import cl.huertohogar.huertohogar_api.service.AuthService;
+import cl.huertohogar.huertohogar_api.service.FirebaseAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final FirebaseAuthService firebaseAuthService;
 
     @PostMapping("/register")
     @Operation(
@@ -50,6 +53,24 @@ public class AuthController {
     })
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/firebase-sync")
+    @Operation(
+        summary = "Sincronizar autenticación Firebase",
+        description = "Valida un token de Firebase y devuelve un JWT del backend. " +
+                "Si el usuario no existe, lo crea automáticamente. " +
+                "Este endpoint permite autenticación híbrida Firebase + Backend JWT."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Sincronización exitosa",
+            content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Token de Firebase inválido o expirado", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Firebase no configurado en el servidor", content = @Content)
+    })
+    public ResponseEntity<AuthResponse> firebaseSync(@Valid @RequestBody FirebaseSyncRequest request) {
+        AuthResponse response = firebaseAuthService.syncWithFirebase(request);
         return ResponseEntity.ok(response);
     }
 }

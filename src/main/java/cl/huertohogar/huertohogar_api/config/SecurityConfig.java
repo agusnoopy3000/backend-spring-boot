@@ -41,8 +41,14 @@ public class SecurityConfig {
                 // Rutas públicas - sin autenticación
                 .requestMatchers(
                     "/api/v1/auth/**",           // Login y registro
+                    "/auth/**",                  // Login y registro (sin prefijo)
                     "/api/v1/products",          // Listar productos (catálogo público)
                     "/api/v1/products/**",       // Ver detalle de producto
+                    "/products",                 // Productos (sin prefijo)
+                    "/products/**",              // Productos (sin prefijo)
+                    "/api/v1/users/firebase-webhook/**", // Webhook Firebase (usa su propia auth)
+                    "/hello",                    // Health check
+                    "/actuator/**",              // Actuator endpoints
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/api-docs/**",

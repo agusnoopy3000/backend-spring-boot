@@ -634,7 +634,7 @@ nohup java -jar ~/huertohogar-api-0.0.1-SNAPSHOT.jar \
   --spring.datasource.username=root \
   --spring.datasource.password=${DB_PASSWORD} \
   --aws.access-key-id=${AWS_ACCESS_KEY_ID} \
-  --aws.secret-access-key=${AWS_SECRET_ACCESS_KEY} \
+  --aws.secret-access-key=TU_AWS_SECRET_KEY \
   --aws.s3.bucket-name=huerto-hogar-documentos \
   --aws.s3.region=us-east-1 \
   > ~/app.log 2>&1 &
